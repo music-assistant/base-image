@@ -58,7 +58,7 @@ RUN set -x \
         libjpeg62-turbo \
         zlib1g \
     # install all music assistant dependencies using the prebuilt wheels
-    && pip install --no-cache-dir -f /wheels \
+    && pip install /wheels \
     # cleanup
     && rm -rf /tmp/* \
     && rm -rf /wheels \

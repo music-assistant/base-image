@@ -1,4 +1,5 @@
-FROM python:3.8-slim as builder
+# syntax=docker/dockerfile:experimental
+FROM python:3.8-slim as wheels-builder
 
 ENV PIP_EXTRA_INDEX_URL=https://www.piwheels.org/simple
 
@@ -31,16 +32,15 @@ RUN curl -L -s https://github.com/jemalloc/jemalloc/releases/download/${JEMALLOC
     && make install
 
 # build python wheels
-ADD https://raw.githubusercontent.com/music-assistant/server/master/requirements.txt /tmp/requirements.txt
 WORKDIR /wheels
+ADD https://raw.githubusercontent.com/music-assistant/server/master/requirements.txt /wheels/requirements.txt
 RUN pip wheel uvloop cchardet aiodns brotlipy \
-    && pip wheel -r /tmp/requirements.txt
+    && pip wheel -r /wheels/requirements.txt
     
 #### FINAL IMAGE
 FROM python:3.8-slim AS final-image
 
 WORKDIR /wheels
-COPY --from=builder /wheels /wheels
 COPY --from=builder /usr/local/lib/libjemalloc.so /usr/local/lib/libjemalloc.so
 RUN set -x \
     # Install runtime dependency packages
@@ -57,12 +57,13 @@ RUN set -x \
         openssl \
         libjpeg62-turbo \
         zlib1g \
-    # install all music assistant dependencies using the prebuilt wheels
-    && pip install /wheels \
     # cleanup
     && rm -rf /tmp/* \
-    && rm -rf /wheels \
-    && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /root/*
+    && rm -rf /var/lib/apt/lists/*
+
+# https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#build-mounts-run---mount
+# Install pip dependencies with built wheels
+RUN --mount=type=bind,target=/wheels,source=/wheels,from=wheels-builder,rw \
+    pip install --no-cache-dir -f /wheels -r /wheels/requirements.txt
 
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so

@@ -41,7 +41,7 @@ RUN pip wheel uvloop cchardet aiodns brotlipy \
 FROM python:3.8-slim AS final-image
 
 WORKDIR /wheels
-COPY --from=builder /usr/local/lib/libjemalloc.so /usr/local/lib/libjemalloc.so
+COPY --from=wheels-builder /usr/local/lib/libjemalloc.so /usr/local/lib/libjemalloc.so
 RUN set -x \
     # Install runtime dependency packages
     && apt-get update \

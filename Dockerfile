@@ -34,8 +34,7 @@ RUN curl -L -s https://github.com/jemalloc/jemalloc/releases/download/${JEMALLOC
 ADD https://raw.githubusercontent.com/music-assistant/server/master/requirements.txt /tmp/requirements.txt
 WORKDIR /wheels
 RUN pip wheel uvloop cchardet aiodns brotlipy \
-    && pip wheel -r /tmp/requirements.txt \
-    && pip wheel /tmp
+    && pip wheel -r /tmp/requirements.txt
     
 #### FINAL IMAGE
 FROM python:3.8-slim AS final-image

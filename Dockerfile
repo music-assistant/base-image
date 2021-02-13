@@ -34,13 +34,11 @@ RUN curl -L -s https://github.com/jemalloc/jemalloc/releases/download/${JEMALLOC
 # build python wheels
 WORKDIR /wheels
 ADD https://raw.githubusercontent.com/music-assistant/server/master/requirements.txt /wheels/requirements.txt
-RUN pip wheel uvloop cchardet aiodns brotlipy \
-    && pip wheel -r /wheels/requirements.txt
+RUN pip wheel -r /wheels/requirements.txt
     
 #### FINAL IMAGE
 FROM python:3.8-slim AS final-image
 
-WORKDIR /wheels
 COPY --from=wheels-builder /usr/local/lib/libjemalloc.so /usr/local/lib/libjemalloc.so
 RUN set -x \
     # Install runtime dependency packages

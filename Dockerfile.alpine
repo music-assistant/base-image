@@ -2,7 +2,7 @@ FROM python:3.8-alpine3.12
 
 ARG JEMALLOC_VERSION=5.2.1
 WORKDIR /tmp
-COPY . .
+ADD https://raw.githubusercontent.com/music-assistant/server/master/requirements.txt /tmp/requirements.txt
 
 # Install packages
 RUN set -x \
@@ -61,18 +61,10 @@ RUN set -x \
         && make \
         && make install \
         && cd /tmp \
-    # make sure optional packages are installed
-    && pip install uvloop cchardet aiodns brotlipy \
-    # install music assistant
-    && pip install . \
+    # make sure required packages are installed
+    && pip install -r /tmp/requirements.txt \
     # cleanup build files
     && apk del .build-deps \
     && rm -rf /tmp/*
 
-ENV DEBUG=false
-EXPOSE 8095/tcp
-
-VOLUME [ "/data" ]
-
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so
-ENTRYPOINT ["mass", "--config", "/data"]

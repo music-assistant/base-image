@@ -9,6 +9,7 @@ RUN set -x \
         curl \
         ca-certificates \
         build-essential \
+        pkg-config \
         gcc \
         libtag1-dev \
         libffi-dev \
@@ -30,6 +31,10 @@ RUN curl -L -s https://github.com/jemalloc/jemalloc/releases/download/${JEMALLOC
     && export MAKEFLAGS="-j$((NB_CORES+1)) -l${NB_CORES}" \
     && make \
     && make install
+    
+# Install Rust
+RUN curl https://sh.rustup.rs -sSf | \
+    sh -s -- --default-toolchain stable -y
 
 # build python wheels
 WORKDIR /wheels

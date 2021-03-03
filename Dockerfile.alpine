@@ -61,6 +61,8 @@ RUN set -x \
         && make \
         && make install \
         && cd /tmp \
+    # setup rust
+    && curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
     # make sure required packages are installed
     && pip install -r /tmp/requirements.txt \
     # cleanup build files

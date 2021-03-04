@@ -1,8 +1,6 @@
 # syntax=docker/dockerfile:experimental
 FROM python:3.9-slim as wheels-builder
 
-ENV PIP_EXTRA_INDEX_URL=https://www.piwheels.org/simple
-
 RUN set -x \
     # Install buildtime packages
     && apt-get update && apt-get install -y --no-install-recommends \
@@ -11,7 +9,6 @@ RUN set -x \
         build-essential \
         pkg-config \
         gcc \
-        cargo \
         libtag1-dev \
         libffi-dev \
         libssl-dev \
@@ -21,7 +18,7 @@ RUN set -x \
         tk8.6-dev \
         libjpeg-turbo-progs \
         libjpeg62-turbo-dev \
-    # update pip
+    # make sure pip is updated
     && python -m pip install -U pip
 
 # build jemalloc

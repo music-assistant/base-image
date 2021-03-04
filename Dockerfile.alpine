@@ -31,7 +31,7 @@ RUN set -x \
         openjpeg \
         tiff \
         zlib \
-    # update pip
+    # make sure pip is updated
     && python -m pip install -U pip \
     # install (temp) build packages
     && apk add --no-cache --virtual .build-deps \

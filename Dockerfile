@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:experimental
-FROM python:3.8-slim as wheels-builder
+FROM python:3.9-slim as wheels-builder
 
 ENV PIP_EXTRA_INDEX_URL=https://www.piwheels.org/simple
 
@@ -11,6 +11,7 @@ RUN set -x \
         build-essential \
         pkg-config \
         gcc \
+        cargo \
         libtag1-dev \
         libffi-dev \
         libssl-dev \
@@ -19,7 +20,9 @@ RUN set -x \
         tcl8.6-dev \
         tk8.6-dev \
         libjpeg-turbo-progs \
-        libjpeg62-turbo-dev
+        libjpeg62-turbo-dev \
+    # update pip
+    && python -m pip install -U pip
 
 # build jemalloc
 ARG JEMALLOC_VERSION=5.2.1
@@ -31,10 +34,6 @@ RUN curl -L -s https://github.com/jemalloc/jemalloc/releases/download/${JEMALLOC
     && export MAKEFLAGS="-j$((NB_CORES+1)) -l${NB_CORES}" \
     && make \
     && make install
-    
-# Install Rust
-RUN curl https://sh.rustup.rs -sSf | \
-    sh -s -- --default-toolchain stable -y
 
 # build python wheels
 WORKDIR /wheels
@@ -42,7 +41,7 @@ ADD https://raw.githubusercontent.com/music-assistant/server/master/requirements
 RUN pip wheel -r /wheels/requirements.txt
     
 #### FINAL IMAGE
-FROM python:3.8-slim AS final-image
+FROM python:3.9-slim AS final-image
 
 COPY --from=wheels-builder /usr/local/lib/libjemalloc.so /usr/local/lib/libjemalloc.so
 RUN set -x \

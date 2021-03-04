@@ -1,4 +1,4 @@
-FROM python:3.8-alpine3.12
+FROM python:3.9-alpine3.13
 
 ARG JEMALLOC_VERSION=5.2.1
 WORKDIR /tmp
@@ -31,12 +31,15 @@ RUN set -x \
         openjpeg \
         tiff \
         zlib \
+    # update pip
+    && python -m pip install -U pip \
     # install (temp) build packages
     && apk add --no-cache --virtual .build-deps \
         build-base \
         libsndfile-dev \
         taglib-dev \
         gcc \
+        cargo \
         musl-dev \
         freetype-dev \
         libpng-dev \
@@ -61,9 +64,7 @@ RUN set -x \
         && make \
         && make install \
         && cd /tmp \
-    # setup rust
-    && curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
-    # make sure required packages are installed
+    # install base requirements
     && pip install -r /tmp/requirements.txt \
     # cleanup build files
     && apk del .build-deps \
